@@ -1,0 +1,1 @@
+# IoT-Based-Food-Wastage-Monitoring-and-Fine-System-in-Hostel-Mess

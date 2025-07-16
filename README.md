@@ -41,6 +41,3 @@ An IoT-based system to **monitor and reduce food wastage** in hostel mess enviro
 8. 🔒 Lid **closes automatically** after disposal.
 
 ---
-
-## 🖼️ System Architecture
-

@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+.env
+
+# Build files
+dist/
+build/
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Firebase config files containing sensitive data
+**/firebase-admin.json
+
+# Upload directory
+Backend/uploads/
+
+# Environment variables
+.env.local
+.env.development
+.env.test
+.env.production

@@ -1,0 +1,11 @@
+@import "tailwindcss";
+:root {
+  --sentinel-navy: #0F172A;   /* Dark Navy */
+  --sentinel-blue: #1E3A8A;   /* Deep Blue */
+  --sentinel-cyan: #06B6D4;   /* Accent Cyan */
+  --sentinel-green: #22C55E;  /* Success */
+  --sentinel-yellow: #FACC15; /* Warning */
+  --sentinel-red: #EF4444;    /* Danger */
+  --sentinel-gray-dark: #1F2937;  /* Neutral Dark */
+  --sentinel-gray-light: #E5E7EB; /* Neutral Light */
+}

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { ref, set } from "firebase/database";
+import { database } from "../config/firebase";
 
 function Protected() {
   const [account, setAccount] = useState(null);
@@ -8,15 +10,36 @@ function Protected() {
   useEffect(() => {
     if (!localStorage.getItem("faceAuth")) {
       navigate("/login");
+      return;
     }
 
-    const { account } = JSON.parse(localStorage.getItem("faceAuth"));
-    setAccount(account);
+    // Read account directly (fix for async state update issue)
+    const stored = JSON.parse(localStorage.getItem("faceAuth"));
+    const user = stored.account;
+    setAccount(user);
+
+    // Only run check logic if user exists
+    if (user?.id) {
+      const checkRef = ref(database, "lastDetected/check");
+
+      // When entering protected page → OPEN dustbin
+      set(checkRef, true)
+        .then(() => console.log("✅ Check set TRUE on Protected page"))
+        .catch((err) => console.error("❌ Error setting check TRUE:", err));
+    }
+
+    // Cleanup: When leaving Protected page → CLOSE dustbin
+    return () => {
+      if (user?.id) {
+        const checkRef = ref(database, "lastDetected/check");
+        set(checkRef, false)
+          .then(() => console.log("🚨 Leaving Protected - check set FALSE"))
+          .catch((err) => console.error("❌ Error setting FALSE:", err));
+      }
+    };
   }, []);
 
-  if (!account) {
-    return null;
-  }
+  if (!account) return null;
 
   return (
     <div className="bg-white pt-40 md:pt-60">
@@ -30,52 +53,47 @@ function Protected() {
             src={
               account?.type === "CUSTOM"
                 ? account.picture
-                : // : import.meta.env.DEV
-                  // ? `/temp-accounts/${account.picture}`
-                  // : `/react-face-auth/temp-accounts/${account.picture}`
-                  `/temp-accounts/${account.picture}`
+                : `/temp-accounts/${account.picture}`
             }
             alt={account.fullName}
           />
+
           <h1
             className="block text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-800"
-            style={{
-              lineHeight: "1.5",
-            }}
+            style={{ lineHeight: "1.5" }}
           >
             {account?.fullName}
           </h1>
+
           <div
             onClick={async () => {
-              // Get student ID from the account before clearing localStorage
               const studentId = account?.id;
-              
-              // Clear face auth data
+
               localStorage.removeItem("faceAuth");
-              
-              // Trigger logout sync if student ID is available
+
               if (studentId) {
                 try {
-                  console.log(`🔄 Triggering logout sync for student: ${studentId}`);
-                  const response = await fetch(`http://localhost:5000/api/sync/logout`, {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ studentId })
-                  });
-                  
+                  const response = await fetch(
+                    `http://localhost:5000/api/sync/logout`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({ studentId }),
+                    }
+                  );
+
                   if (response.ok) {
-                    const result = await response.json();
-                    console.log(`✅ Logout sync successful for student: ${studentId}`, result);
+                    console.log("✅ Logout sync successful");
                   } else {
-                    console.error(`❌ Logout sync failed for student: ${studentId}`, response.statusText);
+                    console.error("❌ Logout sync failed");
                   }
                 } catch (error) {
-                  console.error(`❌ Error during logout sync for student: ${studentId}`, error);
+                  console.error("❌ Logout sync error:", error);
                 }
               }
-              
+
               navigate("/");
             }}
             className="flex gap-2 mt-12 w-fit mx-auto cursor-pointer z-10 py-3 px-6 rounded-full bg-gradient-to-r from-red-400 to-red-600"

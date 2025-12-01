@@ -1,0 +1,11 @@
+cd react-face-auth-master/server
+npm start
+
+cd edai2/Backend
+npm start
+
+cd react-face-auth-master
+npm run dev
+
+cd edai2/frontend
+npm run dev

@@ -28,11 +28,16 @@ const StudentProfile = () => {
   // Handle mark as paid
   const handleMarkAsPaid = async () => {
     try {
+      // Mark all pending fines as paid on the backend
       await axios.put(`/api/auth/students/${id}/markPaid`);
+
+      // Refetch the latest student data so UI reflects updated totals
+      const res = await axios.get(`/api/auth/students/${id}`);
+      setStudent(res.data);
+
       setActionMessage("✅ Fine marked as paid successfully!");
-      setStudent((prev) => ({ ...prev, pendingFine: 0 }));
       setTimeout(() => setActionMessage(""), 3000);
-    } catch (err) {
+    } catch {
       setActionMessage("❌ Failed to mark fine as paid.");
       setTimeout(() => setActionMessage(""), 3000);
     }
@@ -44,7 +49,7 @@ const StudentProfile = () => {
       await axios.post(`/api/auth/students/${id}/sendWarning`);
       setActionMessage("⚠️ Warning sent successfully!");
       setTimeout(() => setActionMessage(""), 3000);
-    } catch (err) {
+    } catch {
       setActionMessage("❌ Failed to send warning.");
       setTimeout(() => setActionMessage(""), 3000);
     }

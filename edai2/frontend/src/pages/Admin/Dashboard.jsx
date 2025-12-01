@@ -217,7 +217,6 @@ const Dashboard = () => {
     );
   }
 
-  const currentMonthData = analyticsData?.summary?.currentMonth;
   const totalFinesCollected = analyticsData?.summary?.totalFinesCollected || 0;
   const totalWaste = analyticsData?.summary?.totalWaste || 0;
 

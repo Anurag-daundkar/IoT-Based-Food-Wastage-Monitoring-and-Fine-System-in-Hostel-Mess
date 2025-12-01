@@ -55,7 +55,7 @@ const StudentManagement = () => {
       const res = await axios.get('/api/auth/students');
       setStudents(res.data);
       setTimeout(() => setActionMessage(''), 3000);
-    } catch (err) {
+    } catch {
       setActionMessage(`❌ Failed to mark fine as paid for ${studentId}.`);
       setTimeout(() => setActionMessage(''), 3000);
     }
@@ -67,7 +67,7 @@ const StudentManagement = () => {
       await axios.post(`/api/auth/students/${studentId}/sendWarning`);
       setActionMessage(`⚠️ Warning sent to student ${studentId}!`);
       setTimeout(() => setActionMessage(''), 3000);
-    } catch (err) {
+    } catch {
       setActionMessage(`❌ Failed to send warning to ${studentId}.`);
       setTimeout(() => setActionMessage(''), 3000);
     }
@@ -190,9 +190,18 @@ const StudentManagement = () => {
                       className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
                     >
                       <td className="py-4 px-4 flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                          <i className="ri-user-line text-gray-600"></i>
-                        </div>
+                        {s.photo ? (
+                          <img
+                            src={`/api/images/${s.photo}`}
+                            alt={s.name}
+                            className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        ) : (
+                          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                            <i className="ri-user-line text-gray-600"></i>
+                          </div>
+                        )}
                         <span className="font-medium text-gray-900">{s.name}</span>
                       </td>
                       <td className="py-4 px-4 text-gray-700">{s.studentId}</td>
@@ -228,6 +237,24 @@ const StudentManagement = () => {
                             className="bg-yellow-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-yellow-600 transition-colors"
                           >
                             Send Warning
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (!confirm(`Delete ${s.name} (${s.studentId})? This cannot be undone.`)) return;
+                              try {
+                                await axios.delete(`/api/auth/students/${s.studentId}`);
+                                setActionMessage(`🗑️ Deleted ${s.studentId}`);
+                                const res = await axios.get('/api/auth/students');
+                                setStudents(res.data);
+                                setTimeout(() => setActionMessage(''), 3000);
+                              } catch {
+                                setActionMessage(`❌ Failed to delete ${s.studentId}`);
+                                setTimeout(() => setActionMessage(''), 3000);
+                              }
+                            }}
+                            className="bg-red-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-700 transition-colors"
+                          >
+                            Delete Student
                           </button>
                         </div>
                       </td>

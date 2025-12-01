@@ -88,6 +88,21 @@ export const syncLogin = async (studentId) => {
       await user.save();
     }
 
+    // Ensure current month totalFines = finesCollected + finesPending
+    try {
+      const newTotalFines = safeNum(currentMonthData.finesCollected) + safeNum(currentMonthData.finesPending);
+      if (safeNum(currentMonthData.totalFines) !== newTotalFines) {
+        currentMonthData.totalFines = newTotalFines;
+        // write back into array
+        const idx = mongoMonthlyData.findIndex(md => md.year === currentYear && md.month === currentMonth);
+        if (idx !== -1) mongoMonthlyData[idx] = currentMonthData;
+        user.monthlyData = mongoMonthlyData;
+        await user.save();
+      }
+    } catch (e) {
+      console.warn('syncLogin: could not recompute totalFines for month', e?.message);
+    }
+
     // Build lastDetected object mirroring MongoDB
     const userObj = user.toObject ? user.toObject() : user;
     const lastDetected = {
@@ -95,6 +110,24 @@ export const syncLogin = async (studentId) => {
       fullName: userObj.name,
       id: String(userObj.studentId),
       picture: userObj.photo ? `/api/images/${userObj.photo}` : null,
+      // indicate a face was detected and authenticated
+
+
+
+
+
+
+
+      // check: true,
+      check: false,
+
+
+
+
+
+
+
+
       // root-level metrics follow MongoDB root fields
       waste: safeNum(userObj.waste),
       totalFine: safeNum(userObj.totalFine),

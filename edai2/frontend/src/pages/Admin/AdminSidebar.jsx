@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext';
-import { FaPhone ,FaEnvelope ,FaShieldAlt, FaPlayCircle, FaRecycle, FaUsers, FaChartLine, FaLeaf, FaClock, FaBell, FaHotel, FaBuilding, FaHome, FaBalanceScale, FaPlus, FaTimes, FaUser, FaMapMarkerAlt, FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaUserGraduate, FaUserShield } from "react-icons/fa";
+import { FaRecycle } from "react-icons/fa";
 
 
 
@@ -65,7 +65,16 @@ const AdminSidebar = () => {
             <span className="font-medium">Complaints/Doubts</span>
           </NavLink>
 
-          {/* DataSync removed */}
+          <NavLink
+            to="/Admin/Threshold"
+            className={({ isActive }) =>
+              `w-full flex items-center space-x-3 px-6 py-3 text-left transition-colors ${isActive ? 'bg-green-50 text-green-600 border-r-2 border-green-600' : 'text-gray-700 hover:text-green-600 hover:bg-green-50'}`
+            }
+          >
+            <i className="ri-scales-3-line text-lg"></i>
+            <span className="font-medium">Threshold Weight</span>
+          </NavLink>
+
         </nav>
 
         <div className="absolute bottom-6 left-6 right-6 flex flex-col gap-2">

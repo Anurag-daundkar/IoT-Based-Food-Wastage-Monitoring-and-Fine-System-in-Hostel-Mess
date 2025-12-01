@@ -1,15 +1,42 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { FaPhone ,FaEnvelope ,FaShieldAlt, FaPlayCircle, FaRecycle, FaUsers, FaChartLine, FaLeaf, FaClock, FaBell, FaHotel, FaBuilding, FaHome, FaBalanceScale, FaPlus, FaTimes, FaUser, FaMapMarkerAlt, FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaUserGraduate, FaUserShield } from "react-icons/fa";
 const LandingPage = () => {
     const navigate = useNavigate();
+    const [lpForm, setLpForm] = useState({ name: "", email: "", category: "general", subject: "", message: "" });
+    const [lpSubmitting, setLpSubmitting] = useState(false);
+    const [lpMsg, setLpMsg] = useState("");
+
+    const onLpChange = (e) => {
+      const { name, value } = e.target;
+      setLpForm((p) => ({ ...p, [name]: value }));
+    };
+
+    const onLpSubmit = async (e) => {
+      e.preventDefault();
+      setLpSubmitting(true);
+      setLpMsg("");
+      try {
+        const payload = {
+          name: lpForm.name,
+          email: lpForm.email,
+          category: lpForm.category || "general",
+          subject: lpForm.subject?.trim() || `Feedback: ${lpForm.category}`,
+          description: lpForm.message,
+        };
+        await axios.post("/api/complaints/public", payload);
+        setLpMsg("Submitted successfully! We will get back to you soon.");
+        setLpForm({ name: "", email: "", category: "general", subject: "", message: "" });
+      } catch (err) {
+        setLpMsg(err.response?.data?.message || "Submission failed");
+      } finally {
+        setLpSubmitting(false);
+      }
+    };
 
   return (
     <div class="min-h-screen">
-    {/* <div><Testing/></div> */}
-    
-        
-
 
         {/* Removed inline student/admin modal sign-in dialogs in favor of dedicated pages */}
 
@@ -143,85 +170,85 @@ const LandingPage = () => {
 
                 {/* Resources */}
                 <section id="resources" class="py-20 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Resources &amp; Guides</h2>
-            <p class="text-xl text-gray-600 max-w-3xl mx-auto">Everything you need to know about effective waste management</p>
-        </div>
-        <div class="grid md:grid-cols-2 gap-12">
-            <div>
-                <h3 class="text-2xl font-semibold text-gray-900 mb-6">Quick Start Guides</h3>
-                <div class="space-y-4">
-                    <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                            <FaPlayCircle className="text-green-600 w-7 h-7"/>
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16">
+                            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Resources &amp; Guides</h2>
+                            <p class="text-xl text-gray-600 max-w-3xl mx-auto">Everything you need to know about effective waste management</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-12">
+                            <div>
+                                <h3 class="text-2xl font-semibold text-gray-900 mb-6">Quick Start Guides</h3>
+                                <div class="space-y-4">
+                                    <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer" onClick={() => navigate('/resources/getting-started')}>
+                                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                                            <FaPlayCircle className="text-green-600 w-7 h-7"/>
+                                            </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Getting Started with Smart Sentinel</h4>
+                                            <p class="text-gray-600 text-sm">5-minute setup guide for administrators</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer" onClick={() => navigate('/resources/student-registration')}>
+                                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                                            <FaUser className="text-blue-600 w-7 h-7"/>
+                                            
+                                            <i class="ri-user-settings-line text-blue-600 text-xl"></i>
+                                            </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Student Registration Process</h4>
+                                            <p class="text-gray-600 text-sm">Step-by-step student onboarding</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer" onClick={() => navigate('/resources/analytics-dashboard')}>
+                                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                                            <div><FaChartLine className="text-purple-600 w-7 h-7"/></div>
+                                            </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Understanding Analytics Dashboard</h4>
+                                            <p class="text-gray-600 text-sm">Make data-driven decisions</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-900">Getting Started with Smart Sentinel</h4>
-                            <p class="text-gray-600 text-sm">5-minute setup guide for administrators</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                            <FaUser className="text-blue-600 w-7 h-7"/>
-                             
-                            <i class="ri-user-settings-line text-blue-600 text-xl"></i>
-                            </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-900">Student Registration Process</h4>
-                            <p class="text-gray-600 text-sm">Step-by-step student onboarding</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
-                            <div><FaChartLine className="text-purple-600 w-7 h-7"/></div>
-                            </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-900">Understanding Analytics Dashboard</h4>
-                            <p class="text-gray-600 text-sm">Make data-driven decisions</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <h3 class="text-2xl font-semibold text-gray-900 mb-6">Best Practices</h3>
-                <div class="space-y-4">
-                    <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                            <FaRecycle className="text-green-600 w-7 h-7"/></div>
-                        <div>
-                            <h4 class="font-semibold text-gray-900">Waste Segregation Guidelines</h4>
-                            <p class="text-gray-600 text-sm">Proper sorting techniques for maximum efficiency</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
-                            <FaUsers className="text-orange-600 w-7 h-7"/>
+                            <div>
+                                <h3 class="text-2xl font-semibold text-gray-900 mb-6">Best Practices</h3>
+                                <div class="space-y-4">
+                                    <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer" onClick={() => navigate('/resources/waste-segregation')}>
+                                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                                            <FaRecycle className="text-green-600 w-7 h-7"/></div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Waste Segregation Guidelines</h4>
+                                            <p class="text-gray-600 text-sm">Proper sorting techniques for maximum efficiency</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer" onClick={() => navigate('/resources/student-engagement')}>
+                                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                                            <FaUsers className="text-orange-600 w-7 h-7"/>
 
 
 
-
+                                            </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Student Engagement Strategies</h4>
+                                            <p class="text-gray-600 text-sm">Build sustainable habits in your community</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer" onClick={() => navigate('/resources/fine-system')}>
+                                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                                            <FaShieldAlt className="text-red-600 w-7 h-7"/>
+                                            
+                                            </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Fine System Implementation</h4>
+                                            <p class="text-gray-600 text-sm">Fair and effective penalty management</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* </div> */}
                             </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-900">Student Engagement Strategies</h4>
-                            <p class="text-gray-600 text-sm">Build sustainable habits in your community</p>
                         </div>
                     </div>
-                    <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
-                            <FaShieldAlt className="text-red-600 w-7 h-7"/>
-                            
-                            </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-900">Fine System Implementation</h4>
-                            <p class="text-gray-600 text-sm">Fair and effective penalty management</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+                </section>
 
 
                 {/* Pricing */}
@@ -352,117 +379,132 @@ const LandingPage = () => {
 
 
 
-{/* Contact */}
-<section id="contact" class="py-20 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Meet Our Core Team</h2>
-            <p class="text-xl text-gray-600 max-w-3xl mx-auto">Dedicated professionals working towards a sustainable campus environment</p>
-        </div>
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="flex items-center flex-col text-center">
-                <img alt="Anurag" class="w-50 h-50 mb-6 rounded-full object-cover object-top" src="/src/assets/Anurag.JPG">
-                </img>
-                <h3 class="text-3xl font-semibold text-gray-900">Anurag Daundkar</h3>
-            </div>
-             <div class="flex items-center flex-col text-center">
-                <img alt="Piyush" class="w-50 h-50 mb-6 rounded-full object-cover object-top" src="/src/assets/Piyushjpg.JPG">
-                </img>
-                <h3 class="text-3xl font-semibold text-gray-900">Abhijeet Budhwant</h3>
-            </div>
-            <div class="flex items-center flex-col text-center">
-                <img alt="Shashank" class="w-50 h-50 mb-6 rounded-full object-cover object-top" src="/src/assets/Shashank.JPG">
-                </img>
-                <h3 class="text-3xl font-semibold text-gray-900">Shashank Akhade</h3>
-            </div>
-             <div class="flex items-center flex-col text-center">
-                <img alt="Krishna" class="w-50 h-50 mb-6 rounded-full object-cover object-top" src="/src/assets/Anurag.JPG">
-                </img>
-                <h3 class="text-3xl font-semibold text-gray-900">Krushna Chandre</h3>
-            </div>
-        </div>
-        <div class="mt-16 text-center">
-            <div class="bg-gray-50 p-8 rounded-xl max-w-4xl mx-auto">
-                <h3 class="text-xl font-semibold text-gray-900 mb-4">Get in Touch</h3>
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="flex items-center justify-center">
-                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3 p-2">
-                            <FaEnvelope className="text-green-600 w-5 h-5"/>
-                            
-                            </div><span class="text-gray-700">anurag.daundkar231@vit.edu</span>
-                    </div>
-                    <div class="flex items-center justify-center">
-                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                            <FaPhone className="text-green-600 w-4 h-4"/>
-                            </div><span class="text-gray-700">+91 9168842004</span>
-                    </div>
-                    <div class="flex items-center justify-center">
-                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                            <FaMapMarkerAlt className="text-green-600 w-4 h-4"/>
+                {/* Contact */}
+                <section id="contact" class="py-20 bg-white">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16">
+                            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Meet Our Core Team</h2>
+                            <p class="text-xl text-gray-600 max-w-3xl mx-auto">Dedicated professionals working towards a sustainable campus environment</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            <div class="flex items-center flex-col text-center">
+                                <img alt="Anurag" class="w-50 h-50 mb-6 rounded-full object-cover object-top" src="/src/assets/Anurag.JPG">
+                                </img>
+                                <h3 class="text-3xl font-semibold text-gray-900">Anurag Daundkar</h3>
                             </div>
-                            <span class="text-gray-700">VIT Pune</span>
+                            <div class="flex items-center flex-col text-center">
+                                <img alt="Piyush" class="w-50 h-50 mb-6 rounded-full object-cover object-top" src="/src/assets/Piyushjpg.JPG">
+                                </img>
+                                <h3 class="text-3xl font-semibold text-gray-900">Abhijeet Budhwant</h3>
+                            </div>
+                            <div class="flex items-center flex-col text-center">
+                                <img alt="Shashank" class="w-50 h-50 mb-6 rounded-full object-cover object-top" src="/src/assets/Shashank.JPG">
+                                </img>
+                                <h3 class="text-3xl font-semibold text-gray-900">Shashank Akhade</h3>
+                            </div>
+                            <div class="flex items-center flex-col text-center">
+                                <img alt="Krishna" class="w-50 h-50 mb-6 rounded-full object-cover object-top" src="/src/assets/Anurag.JPG">
+                                </img>
+                                <h3 class="text-3xl font-semibold text-gray-900">Krushna Chandre</h3>
+                            </div>
+                        </div>
+                        <div class="mt-16 text-center">
+                            <div class="bg-gray-50 p-8 rounded-xl max-w-4xl mx-auto">
+                                <h3 class="text-xl font-semibold text-gray-900 mb-4">Get in Touch</h3>
+                                <div class="grid md:grid-cols-3 gap-6">
+                                    <div class="flex items-center justify-center">
+                                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3 p-2">
+                                            <FaEnvelope className="text-green-600 w-5 h-5"/>
+                                            
+                                            </div><span class="text-gray-700">anurag.daundkar231@vit.edu</span>
+                                    </div>
+                                    <div class="flex items-center justify-center">
+                                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                            <FaPhone className="text-green-600 w-4 h-4"/>
+                                            </div><span class="text-gray-700">+91 9168842004</span>
+                                    </div>
+                                    <div class="flex items-center justify-center">
+                                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                            <FaMapMarkerAlt className="text-green-600 w-4 h-4"/>
+                                            </div>
+                                            <span class="text-gray-700">VIT Pune</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+                </section>
 
 
 
                 {/* Help */}
-<section id="help" class="py-20 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Help &amp; Support</h2>
-            <p class="text-xl text-gray-600 max-w-3xl mx-auto">Find answers to common questions and submit your feedback</p>
-        </div>
-        <div class="grid lg:grid-cols-2 gap-12">
-            <div>
-                <h3 class="text-2xl font-semibold text-gray-900 mb-8">Frequently Asked Questions</h3>
-                <div class="space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm">
-                        <h4 class="font-semibold text-gray-900 mb-2">How does the face recognition system work?</h4>
-                        <p class="text-gray-600">Our AI-powered system captures images when waste is disposed and matches them with registered student profiles to ensure accurate tracking and accountability.</p>
+                <section id="help" class="py-20 bg-gray-50">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16">
+                            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Help &amp; Support</h2>
+                            <p class="text-xl text-gray-600 max-w-3xl mx-auto">Find answers to common questions and submit your feedback</p>
+                        </div>
+                        <div class="grid lg:grid-cols-2 gap-12">
+                            <div>
+                                <h3 class="text-2xl font-semibold text-gray-900 mb-8">Frequently Asked Questions</h3>
+                                <div class="space-y-6">
+                                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                                        <h4 class="font-semibold text-gray-900 mb-2">How does the face recognition system work?</h4>
+                                        <p class="text-gray-600">Our AI-powered system captures images when waste is disposed and matches them with registered student profiles to ensure accurate tracking and accountability.</p>
+                                    </div>
+                                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                                        <h4 class="font-semibold text-gray-900 mb-2">What happens if I can't pay the fine immediately?</h4>
+                                        <p class="text-gray-600">We offer flexible payment plans and the option to earn eco-points through community service to offset penalties. Contact our support team for assistance.</p>
+                                    </div>
+                                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                                        <h4 class="font-semibold text-gray-900 mb-2">How can I improve my compliance score?</h4>
+                                        <p class="text-gray-600">Consistently dispose waste properly, participate in recycling programs, attend sustainability workshops, and maintain a clean personal space to boost your score.</p>
+                                    </div>
+                                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                                        <h4 class="font-semibold text-gray-900 mb-2">Is my personal data secure?</h4>
+                                        <p class="text-gray-600">Yes, we follow strict data protection protocols. Your information is encrypted and used only for waste management purposes within the campus environment.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-semibold text-gray-900 mb-8">Send Us Your Feedback</h3>
+                                <div class="bg-white p-8 rounded-xl shadow-sm">
+                                    <form class="space-y-6" onSubmit={onLpSubmit}>
+                                        <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+                                        <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Enter your full name" name="name" value={lpForm.name} onChange={onLpChange} required />
+                                        </div>
+                                        <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                        <input type="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="your.email@college.edu" name="email" value={lpForm.email} onChange={onLpChange} required />
+                                        </div>
+                                        <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                                        <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Brief subject" name="subject" value={lpForm.subject} onChange={onLpChange} />
+                                        </div>
+                                        <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                                        <select name="category" class="w-full px-4 py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" value={lpForm.category} onChange={onLpChange} required>
+                                                <option value="general">General Feedback</option>
+                                                <option value="technical">Technical Issue</option>
+                                                <option value="suggestion">Feature Suggestion</option>
+                                                <option value="complaint">Complaint</option>
+                                                <option value="doubt">Question/Doubt</option>
+                                        </select>
+                                        </div>
+                                        <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                                        <textarea name="message" rows="5" maxLength={500} class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none" placeholder="Please describe your feedback, suggestion, or concern in detail..." value={lpForm.message} onChange={onLpChange} required></textarea>
+                                        <p class="text-sm text-gray-500 mt-1">Maximum 500 characters</p>
+                                        </div>
+                                        <button type="submit" disabled={lpSubmitting} class={`w-full text-white py-3 px-6 rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer ${lpSubmitting ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'}`}>{lpSubmitting ? 'Submitting...' : 'Submit Feedback'}</button>
+                                        {lpMsg && <div className={`mt-3 text-sm ${lpMsg.includes('success') ? 'text-green-600' : 'text-red-600'}`}>{lpMsg}</div>}
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm">
-                        <h4 class="font-semibold text-gray-900 mb-2">What happens if I can't pay the fine immediately?</h4>
-                        <p class="text-gray-600">We offer flexible payment plans and the option to earn eco-points through community service to offset penalties. Contact our support team for assistance.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm">
-                        <h4 class="font-semibold text-gray-900 mb-2">How can I improve my compliance score?</h4>
-                        <p class="text-gray-600">Consistently dispose waste properly, participate in recycling programs, attend sustainability workshops, and maintain a clean personal space to boost your score.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm">
-                        <h4 class="font-semibold text-gray-900 mb-2">Is my personal data secure?</h4>
-                        <p class="text-gray-600">Yes, we follow strict data protection protocols. Your information is encrypted and used only for waste management purposes within the campus environment.</p>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <h3 class="text-2xl font-semibold text-gray-900 mb-8">Send Us Your Feedback</h3>
-                <div class="bg-white p-8 rounded-xl shadow-sm">
-                    <form class="space-y-6" data-readdy-form="true" id="feedback-form">
-                        <div><label class="block text-sm font-medium text-gray-700 mb-2">Your Name</label><input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Enter your full name" required="" name="name" fdprocessedid="02lo1n"/></div>
-                        <div><label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label><input type="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="your.email@college.edu" required="" name="email" fdprocessedid="y63rxr"/></div>
-                        <div><label class="block text-sm font-medium text-gray-700 mb-2">Category</label><select name="category" class="w-full px-4 py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required="" fdprocessedid="l197uk">
-                                <option value="">Select category</option>
-                                <option value="general">General Feedback</option>
-                                <option value="technical">Technical Issue</option>
-                                <option value="suggestion">Feature Suggestion</option>
-                                <option value="complaint">Complaint</option>
-                                <option value="doubt">Question/Doubt</option>
-                            </select></div>
-                        <div><label class="block text-sm font-medium text-gray-700 mb-2">Message</label><textarea name="message" rows="5" maxlength="500" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none" placeholder="Please describe your feedback, suggestion, or concern in detail..." required=""></textarea>
-                            <p class="text-sm text-gray-500 mt-1">Maximum 500 characters</p>
-                        </div><button type="submit" class="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors whitespace-nowrap cursor-pointer" fdprocessedid="qn0bx">Submit Feedback</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-            
+                </section>   
             </div>
 
 

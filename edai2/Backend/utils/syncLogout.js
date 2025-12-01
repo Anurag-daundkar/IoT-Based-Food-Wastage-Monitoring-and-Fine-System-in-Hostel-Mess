@@ -84,55 +84,52 @@ export const syncLogout = async (studentId) => {
     const snapshot = await lastDetectedRef.once('value');
     const lastDetected = snapshot.val() || {};
 
-    // Prefer root-level values from lastDetected, fall back to month values
-    const monthFromLD = normalizeMonthFromLastDetected(lastDetected.month || lastDetected);
-
-    // Apply root-level updates (use lastDetected root fields if present)
-    const rootUpdates = {};
-    if (lastDetected.waste !== undefined) rootUpdates.waste = safeNum(lastDetected.waste);
-    if (lastDetected.totalFine !== undefined) rootUpdates.totalFine = safeNum(lastDetected.totalFine);
-    if (lastDetected.pendingFine !== undefined) rootUpdates.pendingFine = safeNum(lastDetected.pendingFine);
-    if (lastDetected.score !== undefined) rootUpdates.score = safeNum(lastDetected.score);
-    if (lastDetected.weight !== undefined) rootUpdates.weight = safeNum(lastDetected.weight);
-
-    // If root values missing, use month values
-    if (Object.keys(rootUpdates).length === 0 && monthFromLD) {
-      if (monthFromLD.waste !== undefined) rootUpdates.waste = monthFromLD.waste;
-      if (monthFromLD.totalFines !== undefined) rootUpdates.totalFine = monthFromLD.totalFines;
-      if (monthFromLD.finesPending !== undefined) rootUpdates.pendingFine = monthFromLD.finesPending;
-      if (monthFromLD.score !== undefined) rootUpdates.score = monthFromLD.score;
-      if (monthFromLD.weight !== undefined) rootUpdates.weight = monthFromLD.weight;
+    // 🔹 STRICT behavior per requirement:
+    // "just place that data inside that month of firebase to mongodb's current month's data"
+    // So we only care about lastDetected.month, not root overrides.
+    const monthFromLD = normalizeMonthFromLastDetected(lastDetected.month);
+    if (!monthFromLD) {
+      throw new Error('lastDetected.month is missing or invalid in Firebase');
     }
 
-    // Apply to user document
-    Object.assign(user, rootUpdates);
+    // Ensure the month entry uses the current year/month (from Firebase or from server time)
+    monthFromLD.year = monthFromLD.year || currentYear;
+    monthFromLD.month = monthFromLD.month || currentMonth;
 
-    // Update monthlyData in MongoDB using normalized month metrics
+    // Update MongoDB monthlyData: replace current month's data with lastDetected.month
     const mongoMonthlyData = Array.isArray(user.monthlyData) ? user.monthlyData : [];
-    const monthEntry = monthFromLD || {
-      year: currentYear,
-      month: currentMonth,
-      waste: safeNum(lastDetected.waste),
-      weight: safeNum(lastDetected.weight),
-      finesCollected: 0,
-      finesPending: safeNum(lastDetected.pendingFine),
-      totalFines: safeNum(lastDetected.totalFine),
-      score: safeNum(lastDetected.score)
-    };
-
-    // Ensure year/month set
-    monthEntry.year = monthEntry.year || currentYear;
-    monthEntry.month = monthEntry.month || currentMonth;
-
-    const idx = mongoMonthlyData.findIndex(md => md.year === monthEntry.year && md.month === monthEntry.month);
+    const idx = mongoMonthlyData.findIndex(
+      (md) => md.year === monthFromLD.year && md.month === monthFromLD.month
+    );
     if (idx !== -1) {
-      // Merge fields (preserve any other fields)
-      mongoMonthlyData[idx] = { ...mongoMonthlyData[idx], ...monthEntry };
+      // Replace only the tracked fields for that month with Firebase values
+      mongoMonthlyData[idx] = {
+        ...mongoMonthlyData[idx],
+        waste: monthFromLD.waste,
+        weight: monthFromLD.weight,
+        finesCollected: monthFromLD.finesCollected,
+        finesPending: monthFromLD.finesPending,
+        totalFines: monthFromLD.totalFines,
+        score: monthFromLD.score,
+        year: monthFromLD.year,
+        month: monthFromLD.month,
+      };
     } else {
-      mongoMonthlyData.push(monthEntry);
+      mongoMonthlyData.push(monthFromLD);
     }
 
+    // Recompute root aggregates from monthlyData after replacing current month
     user.monthlyData = mongoMonthlyData;
+    user.waste = mongoMonthlyData.reduce((sum, m) => sum + safeNum(m.waste), 0);
+    user.totalFine = mongoMonthlyData.reduce((sum, m) => sum + safeNum(m.totalFines), 0);
+    user.pendingFine = mongoMonthlyData.reduce((sum, m) => sum + safeNum(m.finesPending), 0);
+    user.score = mongoMonthlyData.length
+      ? Math.round(
+          mongoMonthlyData.reduce((sum, m) => sum + safeNum(m.score), 0) /
+            mongoMonthlyData.length
+        )
+      : safeNum(user.score);
+
     await user.save();
 
     // Write back final canonical state into lastDetected
@@ -144,6 +141,8 @@ export const syncLogout = async (studentId) => {
       fullName: userObj.name,
       id: String(userObj.studentId),
       picture: userObj.photo ? `/api/images/${userObj.photo}` : null,
+      // mark face not detected after logout
+      check: false,
       waste: safeNum(userObj.waste),
       totalFine: safeNum(userObj.totalFine),
       pendingFine: safeNum(userObj.pendingFine),

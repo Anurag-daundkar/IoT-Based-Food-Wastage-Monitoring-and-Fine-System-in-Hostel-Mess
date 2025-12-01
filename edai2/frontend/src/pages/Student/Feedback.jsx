@@ -1,15 +1,31 @@
 import React, { useState } from 'react'
+import axios from 'axios'
 
 const Feedback = () => {
   const [form, setForm] = useState({ subject: '', category: 'suggestion', priority: 'low', description: '', anonymous: false })
+  const [submitting, setSubmitting] = useState(false)
+  const [message, setMessage] = useState('')
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target
     setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
   }
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
+    setSubmitting(true)
+    setMessage('')
+    try {
+      const payload = { ...form }
+      // backend expects status default, only send known fields
+      await axios.post('/api/complaints', payload)
+      setMessage('Submitted successfully!')
+      setForm({ subject: '', category: 'suggestion', priority: 'low', description: '', anonymous: false })
+    } catch (err) {
+      setMessage(err.response?.data?.message || 'Submission failed')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -66,7 +82,10 @@ const Feedback = () => {
                 </label>
                 <p className="text-xs text-gray-500 mt-1">Anonymous submissions help protect your privacy but may limit our ability to follow up directly.</p>
               </div>
-              <button type="submit" className="font-medium rounded-lg transition-all duration-200 cursor-pointer whitespace-nowrap flex items-center justify-center bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl px-8 py-4 text-lg w-full"><i className="ri-send-plane-line mr-2"></i>Submit Feedback</button>
+              <button type="submit" disabled={submitting} className={`font-medium rounded-lg transition-all duration-200 cursor-pointer whitespace-nowrap flex items-center justify-center text-white shadow-lg hover:shadow-xl px-8 py-4 text-lg w-full ${submitting ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'}`}>
+                <i className="ri-send-plane-line mr-2"></i>{submitting ? 'Submitting...' : 'Submit Feedback'}
+              </button>
+              {message && <div className={`mt-3 text-sm ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>{message}</div>}
             </form>
           </div>
 

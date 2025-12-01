@@ -2,6 +2,38 @@ import { ref, set, onValue, get } from 'firebase/database';
 import { database } from '../config/firebase';
 
 export const firebaseService = {
+    // Admin: set global threshold in a dedicated node
+    setThreshold: async (value, meta = {}) => {
+        try {
+            const payload = {
+                value: Number(value),
+                updatedAt: Date.now(),
+                ...meta,
+            };
+            // Write object and a shortcut value path for quick reads
+            await set(ref(database, 'Threshold'), payload);
+            await set(ref(database, 'Threshold/value'), Number(value));
+            return true;
+        } catch (error) {
+            console.error('Error setting threshold:', error);
+            return false;
+        }
+    },
+
+    // Read global threshold; fallback to 500 if absent
+    getThreshold: async () => {
+        try {
+            const valueSnap = await get(ref(database, 'Threshold/value'));
+            if (valueSnap.exists()) return Number(valueSnap.val());
+            const nodeSnap = await get(ref(database, 'Threshold'));
+            if (nodeSnap.exists() && nodeSnap.val()?.value != null) return Number(nodeSnap.val().value);
+            return 500;
+        } catch (error) {
+            console.error('Error getting threshold:', error);
+            return 500;
+        }
+    },
+
     // Update current student ID when throwing waste
     updateCurrentStudent: async (studentId) => {
         try {
@@ -42,7 +74,7 @@ export const firebaseService = {
     // Update student's waste data
     updateStudentWasteData: async (studentId, weight) => {
         try {
-            const threshold = 500; // 500g threshold
+            const threshold = await firebaseService.getThreshold();
             const finePerGram = 0.1; // ₹0.1 per gram over threshold
             
             // Get current total

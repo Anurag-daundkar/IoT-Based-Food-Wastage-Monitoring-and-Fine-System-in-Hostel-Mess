@@ -24,7 +24,7 @@ export function AuthProvider({ children }) {
         if (res.data?.role) {
           localStorage.setItem('role', res.data.role);
         }
-      } catch (_) {
+      } catch {
         // token might be invalid/expired
         setUser(null);
         localStorage.removeItem('token');
@@ -53,7 +53,7 @@ export function AuthProvider({ children }) {
         if (currentUser?.role) {
           localStorage.setItem('role', currentUser.role);
         }
-      } catch (_) {
+      } catch {
         // fallback to minimal user from login response if any
         currentUser = res.data?.user || null;
         setUser(currentUser);

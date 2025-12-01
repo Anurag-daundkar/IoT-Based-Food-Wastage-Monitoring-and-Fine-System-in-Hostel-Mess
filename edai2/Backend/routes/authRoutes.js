@@ -12,6 +12,7 @@ import {
   addWasteData,
   markFineAsPaid,
   sendWarningEmail,
+  deleteStudent,
 } from "../controllers/authController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -40,6 +41,7 @@ router.get("/profile", protect, getProfile);
 // Protected/admin routes
 router.get("/students", getAllStudents);
 router.get("/students/:studentId", getStudentById);
+router.delete("/students/:studentId", deleteStudent);
 router.get("/analytics/monthly", getMonthlyAnalytics);
 router.post("/waste/add", addWasteData);
 router.put("/students/:studentId/markPaid", markFineAsPaid); // ✅ Mark fine as paid

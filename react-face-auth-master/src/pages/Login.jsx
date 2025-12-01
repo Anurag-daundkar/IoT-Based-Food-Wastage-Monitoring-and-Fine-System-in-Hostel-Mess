@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as faceapi from "face-api.js";
-import { ref, set, get } from "firebase/database";
+import { ref, set, get, onValue } from "firebase/database";
 import { database } from "../config/firebase";
 import { useNavigate } from "react-router-dom";
 
@@ -41,6 +41,55 @@ function Login() {
       })
       .then(() => setModelsLoaded(true));
   }, []);
+
+  // Auto-start camera and scanning when Firebase solve=true
+  // useEffect(() => {
+  //   const solveRef = ref(database, 'solve');
+  //   const unsub = onValue(solveRef, (snap) => {
+  //     const val = snap.val();
+  //     if (val === true) {
+  //       if (modelsLoaded && !localUserStream) {
+  //         getLocalUserVideo();
+  //       }
+  //     }
+  //   });
+  //   return () => unsub();
+  // }, [modelsLoaded, localUserStream]);
+
+
+
+
+
+
+  useEffect(() => {
+  const solveRef = ref(database, "solve");
+
+  const unsub = onValue(solveRef, (snap) => {
+    const val = snap.val();
+
+    if (val === true) {
+      // Start camera auto
+      if (modelsLoaded && !localUserStream) {
+        getLocalUserVideo();
+      }
+    } else {
+      // Stop camera when solve becomes false
+      if (localUserStream) {
+        localUserStream.getTracks().forEach((t) => t.stop());
+        videoRef.current.srcObject = null;
+        setLocalUserStream(null);
+      }
+    }
+  });
+
+  return () => unsub();
+}, [modelsLoaded, localUserStream]);
+
+
+
+
+
+
 
   useEffect(() => {
     if (loginResult === "SUCCESS") {
@@ -116,12 +165,13 @@ function Login() {
           setLoginResult("SUCCESS");
           // Proceed to write detected student info to Firebase Realtime Database
             
-            // Write last detection
+            // Write last detection WITHOUT check flag (will be set on Protected page)
             const detectionPayload = {
               id: account.id,
               fullName: account.fullName,
               picture: account.picture,
               detectedAt: new Date().toISOString(),
+              check: false, // Keep false during scanning, will be set to true on Protected page
             };
             set(ref(database, "lastDetected"), detectionPayload);
 
@@ -180,6 +230,10 @@ function Login() {
 
                 // Save updated student record (structure preserved)
                 set(studentRef, updatedStudent);
+                
+                // Also update lastDetected/month with current month data
+                const lastDetectedMonthRef = ref(database, 'lastDetected/month');
+                set(lastDetectedMonthRef, currentMonthData);
               } catch (e) {
                 console.error("Failed to update student monthly data:", e);
               }

@@ -6,10 +6,12 @@ import authRoutes from "./routes/authRoutes.js";
 import imageRoutes from "./routes/imageRoutes.js";
 import userAggregates from "./routes/userAggregates.js";
 import syncRoutes from "./routes/syncRoutes.js";
+import complaintRoutes from "./routes/complaintRoutes.js";
 import { initGridFS } from './config/gridfs.js';
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import { initializeFirebase, processWasteAndCalculateFine } from './services/firebaseWasteProcessor.js';
 
 dotenv.config();
 connectDB();
@@ -45,7 +47,19 @@ app.use("/api/auth", authRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/users', userAggregates);
 app.use('/api/sync', syncRoutes);
+app.use('/api/complaints', complaintRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, async () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  
+  // Initialize Firebase and start waste processor
+  try {
+    initializeFirebase();
+    await processWasteAndCalculateFine();
+    console.log('🔥 Waste processor service started');
+  } catch (error) {
+    console.error('⚠️ Waste processor failed to start:', error);
+  }
+});

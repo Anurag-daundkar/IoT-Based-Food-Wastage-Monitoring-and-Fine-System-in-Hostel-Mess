@@ -1,7 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { ref, set } from "firebase/database";
+import { database } from "../config/firebase";
 
 function Home() {
+  // Ensure dustbin is closed when viewing the landing page
+  useEffect(() => {
+    const checkRef = ref(database, "lastDetected/check");
+    set(checkRef, false).catch((err) => {
+      console.error("Error setting check=false on Home:", err);
+    });
+  }, []);
   // style={{ backgroundImage: "url('/src/assets/images/Layout.png')" }}
   return (
     <div className="flex min-h-screen items-center justify-center align-middle">

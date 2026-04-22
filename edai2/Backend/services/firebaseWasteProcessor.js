@@ -80,9 +80,18 @@ export const processWasteAndCalculateFine = async () => {
           console.log('✅ Within threshold, no fine');
         }
 
-        // Update waste in month object
-        const updatedWaste = (currentMonth.waste || 0) + measuredWeight;
-        const updatedFinesPending = (currentMonth.finesPending || 0) + calculatedFine;
+//         const previousWaste = currentMonth.waste || 0;
+// const previousFines = currentMonth.finesPending || 0;
+
+// const excess = Math.max(0, measuredWeight - threshold);
+
+// // ✅ Do NOT redeclare
+// calculatedFine = excess * 10;
+
+// const updatedWaste = previousWaste + excess;
+// const updatedFinesPending = previousFines + calculatedFine;
+    const updatedWaste = (currentMonth.waste || 0) + measuredWeight;
+    const updatedFinesPending = (currentMonth.finesPending || 0) + calculatedFine;
 
         // Prepare updated month object
         const updatedMonth = {

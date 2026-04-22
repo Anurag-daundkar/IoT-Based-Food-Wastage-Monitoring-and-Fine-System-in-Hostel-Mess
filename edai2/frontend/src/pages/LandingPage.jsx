@@ -403,7 +403,7 @@ const LandingPage = () => {
                                 <h3 class="text-3xl font-semibold text-gray-900">Shashank Akhade</h3>
                             </div>
                             <div class="flex items-center flex-col text-center">
-                                <img alt="Krishna" class="w-50 h-50 mb-6 rounded-full object-cover object-top" src="/src/assets/Anurag.JPG">
+                                <img alt="Krishna" class="w-50 h-50 mb-6 rounded-full object-cover object-top" src="/src/assets/Krushna.JPG">
                                 </img>
                                 <h3 class="text-3xl font-semibold text-gray-900">Krushna Chandre</h3>
                             </div>

@@ -22,6 +22,14 @@ function Login() {
 
   const navigate = useNavigate();
 
+  // Ensure dustbin is closed while on the login/scanning page
+  useEffect(() => {
+    const checkRef = ref(database, "lastDetected/check");
+    set(checkRef, false).catch((err) => {
+      console.error("Error setting check=false on Login:", err);
+    });
+  }, []);
+
   const loadModels = async () => {
     // const uri = import.meta.env.DEV ? "/models" : "/react-face-auth/models";
     const uri = "/models";

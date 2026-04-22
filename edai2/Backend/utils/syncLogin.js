@@ -111,22 +111,7 @@ export const syncLogin = async (studentId) => {
       id: String(userObj.studentId),
       picture: userObj.photo ? `/api/images/${userObj.photo}` : null,
       // indicate a face was detected and authenticated
-
-
-
-
-
-
-
-      // check: true,
-      check: false,
-
-
-
-
-
-
-
+      // NOTE: do not modify `check` here; React face-auth controls it
 
       // root-level metrics follow MongoDB root fields
       waste: safeNum(userObj.waste),
@@ -150,9 +135,9 @@ export const syncLogin = async (studentId) => {
     const db = admin.database();
     const lastDetectedRef = db.ref('lastDetected');
 
-    // Write the lastDetected node (replace) so UI sees the exact state
-    await lastDetectedRef.set(lastDetected);
-    console.log(`✅ Login: wrote lastDetected for ${studentId}`, lastDetected);
+    // Update lastDetected without touching `check` so React/Arduino control it
+    await lastDetectedRef.update(lastDetected);
+    console.log(`✅ Login: updated lastDetected for ${studentId}`, lastDetected);
 
     return { success: true, studentId, month: `${currentYear}-${currentMonth}` };
   } catch (err) {

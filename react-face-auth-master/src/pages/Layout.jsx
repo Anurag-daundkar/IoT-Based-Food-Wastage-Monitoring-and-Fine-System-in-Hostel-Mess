@@ -58,14 +58,6 @@ function Layout() {
     return () => unsub();
   }, [location.pathname, navigate]);
 
-  // 🔹 Ensure check=false on every route change (any page in this app)
-  useEffect(() => {
-    const checkRef = ref(database, "lastDetected/check");
-    set(checkRef, false).catch((err) => {
-      console.error("Error forcing check=false on route change:", err);
-    });
-  }, [location.pathname]);
-
   if (!account && whiteList.includes(location.pathname)) {
     return <Navigate to="/" />;
   }

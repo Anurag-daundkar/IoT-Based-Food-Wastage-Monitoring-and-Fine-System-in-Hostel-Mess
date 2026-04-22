@@ -22,7 +22,7 @@ function Protected() {
     if (user?.id) {
       const checkRef = ref(database, "lastDetected/check");
 
-      // When entering protected page → OPEN dustbin
+      // When entering protected page → OPEN dustbin and keep it OPEN
       set(checkRef, true)
         .then(() => console.log("✅ Check set TRUE on Protected page"))
         .catch((err) => console.error("❌ Error setting check TRUE:", err));
@@ -30,7 +30,15 @@ function Protected() {
 
     // Cleanup: When leaving Protected page → CLOSE dustbin
     return () => {
-      if (user?.id) {
+      let latestAuth = null;
+      try {
+        latestAuth = JSON.parse(localStorage.getItem("faceAuth") || "null");
+      } catch {
+        latestAuth = null;
+      }
+      const latestUser = latestAuth?.account || user;
+
+      if (latestUser?.id) {
         const checkRef = ref(database, "lastDetected/check");
         set(checkRef, false)
           .then(() => console.log("🚨 Leaving Protected - check set FALSE"))

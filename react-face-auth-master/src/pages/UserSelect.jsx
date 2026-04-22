@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import User from "../components/User";
 import { RadioGroup } from "@headlessui/react";
 import { Link } from "react-router-dom";
+import { ref, set } from "firebase/database";
+import { database } from "../config/firebase";
 
 const accounts = [
   {
@@ -35,6 +37,14 @@ function UserSelect() {
   const [selected, setSelected] = useState(accounts[0]);
   const [customUser, setCustomUser] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+
+  // Ensure dustbin is closed while on the user selection page
+  useEffect(() => {
+    const checkRef = ref(database, "lastDetected/check");
+    set(checkRef, false).catch((err) => {
+      console.error("Error setting check=false on UserSelect:", err);
+    });
+  }, []);
 
   const convertBase64 = (file) => {
     return new Promise((resolve, reject) => {
